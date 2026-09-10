@@ -448,8 +448,7 @@ img { max-width: 100%; display: block; }
   font-weight: 600;
   color: #fff;
 }
-.src-tag.velog { background: var(--velog-color); }
-.src-tag.gitbook { background: var(--gitbook-color); }
+.src-tag { background: rgba(0,0,0,0.45); backdrop-filter: blur(4px); }
 .post-body { padding: 16px; }
 .post-cat-badge {
   display: inline-flex;
@@ -1205,7 +1204,7 @@ function renderPosts() {
     return `<div class="post-card" onclick="openPost(${p.id})">
       <div class="post-thumb ${thumbClass}" style="${thumbStyle}">
         ${!hasThumb ? `<span class="grad-icon">${p.icon||'📝'}</span>` : ''}
-        <span class="src-tag ${p.source}">${p.source === 'velog' ? 'Velog' : 'GitBook'}</span>
+        <span class="src-tag ${p.source}">${esc(p.cat||'기타')}</span>
       </div>
       <div class="post-body">
         <div class="post-cat-badge">${p.icon||''} ${esc(p.cat||'')}</div>
@@ -1224,7 +1223,7 @@ function renderTimeline() {
   const byYear = {};
   for (const r of retros) {
     const y = (r.date||'').slice(0,4);
-    if (!byYear[y]) byYear[y] = r;
+    byYear[y] = r;
   }
   const entries = Object.entries(byYear).sort((a,b) => a[0].localeCompare(b[0]));
   const titles = ['기록의 시작', '변화와 성장', '함께 나아가기', '새로운 장'];
@@ -1317,7 +1316,7 @@ async function openPost(id) {
   document.getElementById('detailMeta').innerHTML =
     `<span class="cat-badge">${p.icon||''} ${esc(p.cat||'')}</span>` +
     `<span>${p.date||''}</span>` +
-    `<span>${p.source === 'velog' ? 'Velog' : 'GitBook'}</span>`;
+    `<span>${p.source||''}</span>`;
 
   const contentEl = document.getElementById('detailContent');
   contentEl.innerHTML = '<div class="loading-wrap"><span class="spinner"></span><p style="margin-top:12px">페이지를 넘기는 중...</p></div>';
