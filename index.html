@@ -1046,6 +1046,17 @@ let state = { source: 'all', cat: null, search: '', visible: 24, sort: 'newest' 
 let showAllCats = false;
 
 const GRAD_COLORS = ['grad-0','grad-1','grad-2','grad-3','grad-4','grad-5','grad-6','grad-7'];
+const CAT_COLORS = {
+  'Java':'#b07219','Java 용어':'#b07219','Spring':'#6db33f','HTTP 웹 지식':'#4a90d9','HTTP 완벽 가이드':'#4a90d9',
+  'CS 지식':'#6c5ce7','컴퓨터 구조':'#6c5ce7','OS':'#636e72','네트워크':'#00b894','알고리즘':'#e17055','자료구조':'#d63031',
+  '리눅스':'#fdcb6e','CI-CD':'#0984e3','Docker':'#0db7ed','Git':'#f05032','Rust':'#dea584','Modern Java':'#b07219',
+  '트러블슈팅':'#e84393','도서 리뷰':'#8e6d4f','커리어':'#00cec9','회고록':'#a29bfe','에세이':'#fab1a0',
+  '커뮤니티':'#55efc4','팀프로젝트':'#74b9ff','도서 스터디':'#8e6d4f','정보처리기사':'#ffeaa7','자격증':'#ffeaa7',
+  '멀티캠퍼스 과정':'#81ecec','Effective Java':'#b07219',
+  '맛집':'#ff6348','간식':'#ff9ff3','문화생활':'#c44569','카페':'#6a4c3a','여행':'#1dd1a1','일상':'#5f27cd',
+  '보안':'#2d3436','기타':'#636e72',
+};
+function catColor(cat) { return CAT_COLORS[cat] || '#636e72'; }
 function gradClass(cat) {
   let h = 0;
   for (let i = 0; i < (cat||'').length; i++) h = ((h << 5) - h + cat.charCodeAt(i)) | 0;
@@ -1204,7 +1215,7 @@ function renderPosts() {
     return `<div class="post-card" onclick="openPost(${p.id})">
       <div class="post-thumb ${thumbClass}" style="${thumbStyle}">
         ${!hasThumb ? `<span class="grad-icon">${p.icon||'📝'}</span>` : ''}
-        <span class="src-tag ${p.source}">${esc(p.cat||'기타')}</span>
+        <span class="src-tag" style="background:${catColor(p.cat)}">${esc(p.cat||'기타')}</span>
       </div>
       <div class="post-body">
         <div class="post-cat-badge">${p.icon||''} ${esc(p.cat||'')}</div>
