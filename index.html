@@ -108,11 +108,6 @@
   --shadow-md: 0 4px 16px rgba(0,0,0,0.2);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) .hero-bg::after { --fade: 26,23,18; }
-}
-:root[data-theme="dark"] .hero-bg::after { --fade: 26,23,18; }
-
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 body {
   background: var(--bg);
@@ -204,28 +199,20 @@ img { max-width: 100%; display: block; }
 /* ===== HERO ===== */
 .hero {
   position: relative;
-  min-height: 400px;
+  min-height: 320px;
   overflow: hidden;
-  margin-bottom: 24px;
 }
 .hero-bg {
   position: absolute;
   inset: 0;
   background: url('hero-illust.png') right center / cover no-repeat;
 }
-.hero-bg::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  --fade: 245,240,232;
-  background: linear-gradient(90deg, rgba(var(--fade),0.3) 0%, transparent 40%);
-}
 .hero-inner {
   position: relative;
   z-index: 2;
   max-width: var(--max-w);
   margin: 0 auto;
-  padding: 64px 32px 56px;
+  padding: 56px 28px 48px;
   display: flex;
   align-items: center;
 }
@@ -235,18 +222,18 @@ img { max-width: 100%; display: block; }
   color: var(--text-3);
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  margin-bottom: 16px;
+  margin-bottom: 12px;
 }
 .hero-title {
   font-family: var(--title);
-  font-size: clamp(28px, 4vw, 38px);
-  line-height: 1.4;
-  margin-bottom: 16px;
+  font-size: clamp(26px, 4vw, 36px);
+  line-height: 1.35;
+  margin-bottom: 12px;
 }
 .hero-sub {
   font-size: 15px;
   color: var(--text-2);
-  margin-bottom: 32px;
+  margin-bottom: 28px;
 }
 .hero-stats {
   display: flex;
@@ -883,9 +870,8 @@ img { max-width: 100%; display: block; }
 
 /* ===== RESPONSIVE ===== */
 @media (max-width: 900px) {
-  .hero { min-height: 220px; }
-  .hero-bg { opacity: 0.35; }
-  .hero-bg::after { background: linear-gradient(90deg, var(--bg) 0%, rgba(245,240,232,0.6) 50%, transparent 100%); }
+  .hero { min-height: 200px; }
+  .hero-bg { opacity: 0.3; }
   .main-layout { flex-direction: column; }
   .sidebar { position: static; max-height: none; flex: none; }
   .post-grid { grid-template-columns: 1fr; }
@@ -899,7 +885,7 @@ img { max-width: 100%; display: block; }
   .header-inner { padding: 10px 16px; flex-wrap: wrap; gap: 8px; }
   .header-nav { display: none; }
   .header-search { width: 100%; order: 10; }
-  .hero { padding: 28px 0 20px; min-height: 180px; }
+  .hero { padding: 28px 0 20px; }
   .hero-title { font-size: 24px; }
   .hero-stats { flex-wrap: wrap; gap: 12px; }
   .source-tabs { flex-wrap: wrap; }
