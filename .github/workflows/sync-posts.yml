@@ -1,0 +1,35 @@
+name: Sync Velog Posts
+
+on:
+  schedule:
+    - cron: '0 */6 * * *'  # 6시간마다
+  workflow_dispatch:        # 수동 실행
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Sync Velog posts
+        run: node scripts/sync-velog.mjs
+
+      - name: Commit and push if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add posts-meta.json content/
+          if git diff --staged --quiet; then
+            echo "No changes"
+          else
+            COUNT=$(git diff --staged --name-only | grep "^content/" | wc -l)
+            git commit -m "chore: sync ${COUNT} new Velog post(s)"
+            git push
+          fi
