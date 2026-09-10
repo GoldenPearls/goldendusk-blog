@@ -205,7 +205,21 @@ img { max-width: 100%; display: block; }
 .hero-bg {
   position: absolute;
   inset: 0;
-  background: url('hero-illust.png') right center / cover no-repeat;
+  background: url('hero-illust.png') center center / cover no-repeat;
+}
+.hero-bg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, var(--bg) 0%, var(--bg) 15%, rgba(245,240,232,0.7) 30%, rgba(245,240,232,0.2) 50%, transparent 65%);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .hero-bg::after {
+    background: linear-gradient(90deg, var(--bg) 0%, var(--bg) 15%, rgba(26,23,18,0.7) 30%, rgba(26,23,18,0.2) 50%, transparent 65%);
+  }
+}
+:root[data-theme="dark"] .hero-bg::after {
+  background: linear-gradient(90deg, var(--bg) 0%, var(--bg) 15%, rgba(26,23,18,0.7) 30%, rgba(26,23,18,0.2) 50%, transparent 65%);
 }
 .hero-inner {
   position: relative;
