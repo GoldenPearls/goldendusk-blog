@@ -1,0 +1,44 @@
+# 정적 멤버 클래스
+
+정적 멤버 클래스(Static Member Class)는 외부 클래스의 인스턴스와는 독립적으로 존재하는 클래스입니다. 즉, 정적 멤버 클래스는 외부 클래스의 인스턴스 없이도 생성할 수 있으며, 외부 클래스의 인스턴스 변수나 메서드에 직접 접근할 수 없습니다. 대신, 외부 클래스의 `static` 멤버에만 접근할 수 있습니다.
+
+#### 주요 특징
+
+1. **독립성**: 정적 멤버 클래스는 외부 클래스의 인스턴스 없이도 사용할 수 있습니다. 객체를 생성할 때 외부 클래스의 객체가 필요하지 않습니다.
+2. **접근 제한**: 정적 멤버 클래스는 외부 클래스의 인스턴스 멤버(변수 및 메서드)에 직접 접근할 수 없습니다. 대신, 외부 클래스의 `static` 멤버에만 접근할 수 있습니다.
+3. **네임스페이스**: 정적 멤버 클래스를 사용하면 관련된 클래스를 그룹화하여 코드의 가독성을 높일 수 있습니다.
+
+#### 예제 (Java)
+
+```java
+public class OuterClass {
+    private static String staticVariable = "Hello";
+    private String instanceVariable = "World";
+
+    // 정적 멤버 클래스
+    public static class StaticNestedClass {
+        public void display() {
+            // 외부 클래스의 static 변수에 접근 가능
+            System.out.println(staticVariable);
+            // 외부 클래스의 인스턴스 변수에 직접 접근 불가
+            // System.out.println(instanceVariable); // 오류 발생
+        }
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        // 정적 멤버 클래스의 객체 생성
+        OuterClass.StaticNestedClass nestedObject = new OuterClass.StaticNestedClass();
+        nestedObject.display(); // "Hello" 출력
+    }
+}
+```
+
+#### 설명
+
+* `OuterClass` 내부에 `StaticNestedClass`라는 정적 멤버 클래스를 정의했습니다.
+* `StaticNestedClass`에서는 `OuterClass`의 `staticVariable`에 접근할 수 있지만, 인스턴스 변수인 `instanceVariable`에는 접근할 수 없습니다.
+* `Main` 클래스에서 정적 멤버 클래스를 생성하고 사용하였습니다.
+
+정적 멤버 클래스는 코드 구조를 더 명확하게 하고, 관련된 클래스를 그룹화하는 데 유용합니다.

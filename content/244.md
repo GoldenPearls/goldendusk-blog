@@ -1,0 +1,92 @@
+# 제네릭 배열에 대한 정리
+
+`T[]`는 **제네릭 배열(Generic Array)을 의미하며, Java에서 제네릭 타입 매개변수를 사용한 배열을 나타냅니다.** 여기서 `T`는 제네릭 타입 매개변수를 나타내며, 특정 타입으로 바인딩될 수 있습니다. 이 배열은 제네릭 타입의 요소들을 담을 수 있도록 설계된 배열입니다.
+
+## 1. 제네릭 타입 매개변수 `T`
+
+* `T`는 **제네릭 타입 매개변수**로, 일반적으로 어떤 타입이든 사용자가 원하는 타입을 의미합니다.
+* 제네릭 클래스나 메서드에서 타입 매개변수로 사용되며, 이 타입 매개변수는 컴파일 시점에 실제 타입으로 대체됩니다.
+
+예를 들어, 제네릭 메서드의 선언에서 `T`는 특정 타입을 의미할 수 있습니다.
+
+```java
+public <T> void printArray(T[] array) {
+    for (T element : array) {
+        System.out.println(element);
+    }
+}
+```
+
+위 코드에서 `<T>`는 메서드의 타입 매개변수를 나타내며, `T[]`는 해당 타입을 요소로 가지는 배열입니다.
+
+## 2. `T[]`의 의미
+
+* **`T[]`는 제네릭 타입의 요소들을 저장할 수 있는 배열**을 의미합니다. 예를 들어, `T`가 `String`으로 대체되면, `T[]`는 `String[]` 배열이 됩니다.
+* `T[]` 배열은 `T` 타입의 요소만 저장할 수 있으며, 제네릭의 타입 안전성을 보장합니다.
+
+## 3. 제네릭 배열 생성의 제한
+
+Java에서는 **제네릭 배열의 직접적인 생성이 허용되지 않습니다.** 예를 들어, `new T[10]`과 같은 배열 생성은 컴파일 오류가 발생합니다. 이는 제네릭 타입의 정보가 런타임에 소거되기 때문에, 배열의 타입 안전성을 보장할 수 없기 때문입니다.
+
+```java
+public <T> T[] createArray(int size) {
+    // 컴파일 오류 발생: 제네릭 타입 T로 배열을 생성할 수 없음
+    // T[] array = new T[size];
+    
+    // 대신 Object 배열을 생성한 후 T[]로 형변환하는 방식 사용
+    @SuppressWarnings("unchecked")
+    T[] array = (T[]) new Object[size];
+    return array;
+}
+```
+
+위 코드에서 제네릭 타입으로 배열을 생성하는 대신, **`Object` 배열을 생성한 후 `T[]`로 형변환**하여 배열을 생성합니다. 이때 `@SuppressWarnings("unchecked")` 애너테이션을 사용해 비검사 형변환 경고를 억제할 수 있습니다.
+
+## 4. 제네릭 배열 사용 예
+
+다음은 제네릭 배열을 사용한 예입니다.
+
+```java
+public class GenericArrayExample<T> {
+    private T[] array;
+
+    public GenericArrayExample(int size) {
+        // 제네릭 배열을 생성할 때 Object 배열을 사용하고 형변환
+        @SuppressWarnings("unchecked")
+        array = (T[]) new Object[size];
+    }
+
+    public void set(int index, T value) {
+        array[index] = value;
+    }
+
+    public T get(int index) {
+        return array[index];
+    }
+
+    public static void main(String[] args) {
+        GenericArrayExample<String> stringArray = new GenericArrayExample<>(10);
+        stringArray.set(0, "Hello");
+        System.out.println(stringArray.get(0)); // 출력: Hello
+    }
+}
+```
+
+위 예제에서 `GenericArrayExample` 클래스는 제네릭 타입 `T`를 사용하여 배열을 생성하고, 배열의 요소를 읽거나 쓸 수 있습니다.
+
+## 5. 제네릭 배열의 주의점
+
+1. **직접적인 제네릭 배열 생성은 불가능**:
+   * `new T[10]`과 같은 구문은 허용되지 않으며, 대신 `Object` 배열을 생성한 후 형변환해야 합니다.
+2. **타입 안전성을 위해 비검사 형변환 경고 억제 필요**:
+   * `Object[]`에서 `T[]`로 형변환할 때 `@SuppressWarnings("unchecked")`를 사용해야 합니다.
+3. **런타임 시 타입 정보 소거**:
+   * 제네릭 배열은 타입 정보를 런타임에 유지하지 않기 때문에, 배열의 타입 안전성을 컴파일 시점에 보장해야 합니다.
+
+## 6. 정리
+
+* **`T[]`는 제네릭 타입 매개변수 `T`를 요소로 가지는 배열**을 의미하며, 컴파일 시점에 특정 타입으로 대체됩니다.
+* 제네릭 배열은 직접 생성할 수 없으므로, `Object` 배열을 생성한 후 형변환을 통해 제네릭 배열을 사용합니다.
+* 제네릭 배열을 사용할 때는 **비검사 형변환 경고를 억제**하고, **타입 안전성을 보장**할 수 있는 코드를 작성해야 합니다.
+
+제네릭 배열은 Java에서 제네릭의 타입 안전성을 유지하면서 배열을 사용할 수 있게 해주는 중요한 기능입니다.

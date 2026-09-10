@@ -1,0 +1,87 @@
+# 어댑터란?
+
+`어댑터(Adapter)`는 <mark style="color:red;">소프트웨어 디자인 패턴 중 하나로, 서로 호환되지 않는 인터페이스를 가진 클래스들이 함께 동작할 수 있도록 변환해주는 역할을 합니다</mark>. 즉, **기존 클래스의 인터페이스를 클라이언트가 원하는 다른 인터페이스로 변환**해주는 역할을 합니다.
+
+이 패턴은 **호환되지 않는 인터페이스**를 가진 클래스들이 함께 사용할 수 있도록 중간에서 변환 작업을 처리해주는 일종의 "변환기" 역할을 하는 것입니다. 자바에서는 특히 **컬렉션**, **스트림**, **배열** 등을 변환할 때 어댑터 패턴을 자주 사용합니다.
+
+#### 어댑터 패턴의 사용 목적:
+
+1. **호환되지 않는 인터페이스를 연결**하여 기존 코드를 변경하지 않고도 새로운 방식으로 사용할 수 있게 합니다.
+2. **재사용성**을 높이기 위해, 기존 클래스를 수정하지 않고 다른 방식으로 활용할 수 있도록 도와줍니다.
+
+#### 예시로 설명한 코드에서 어댑터의 역할:
+
+```java
+static List<Integer> intArrayAsList(int[] a) {
+    return new AbstractList<>() {
+        @Override
+        public Integer get(int i) {
+            return a[i]; // int 배열의 값을 Integer로 변환하여 제공
+        }
+
+        @Override
+        public Integer set(int i, Integer val) {
+            int oldVal = a[i];
+            a[i] = val; // Integer 값을 int 배열에 저장
+            return oldVal;
+        }
+
+        @Override
+        public int size() {
+            return a.length; // 배열의 크기를 리스트의 크기로 반환
+        }
+    };
+}
+```
+
+이 코드는 **`int[]` 배열**을 받아 `List<Integer>`로 변환해줍니다. 즉, **배열을 리스트처럼 다룰 수 있도록 변환**하는 어댑터 역할을 합니다.
+
+* `int[]` 배열은 기본 자료형을 사용하고, 리스트(List)는 제네릭 타입을 사용합니다.
+* 이 두 가지는 **호환되지 않는** 자료구조이므로, **어댑터 패턴**을 통해 배열을 리스트로 변환하여 서로 다른 방식으로 데이터를 처리할 수 있게 만들어 줍니다.
+
+#### 어댑터 패턴의 일반적인 구조:
+
+1. **클라이언트(Client)**: 기존 클래스의 기능을 사용하려는 코드입니다.
+2. **어댑티(Adaptee)**: 기존 클래스, 즉 변환해야 하는 대상입니다.
+3. **어댑터(Adapter)**: 어댑티의 인터페이스를 클라이언트가 원하는 인터페이스로 변환하는 클래스입니다.
+
+#### 어댑터 패턴의 간단한 예:
+
+```java
+// 기존 클래스
+class OldSystem {
+    public void oldMethod() {
+        System.out.println("Old method is called");
+    }
+}
+
+// 어댑터 인터페이스
+interface NewSystem {
+    void newMethod();
+}
+
+// 어댑터 클래스
+class Adapter implements NewSystem {
+    private OldSystem oldSystem;
+
+    public Adapter(OldSystem oldSystem) {
+        this.oldSystem = oldSystem;
+    }
+
+    @Override
+    public void newMethod() {
+        oldSystem.oldMethod(); // 기존 메서드를 새로운 메서드로 변환
+    }
+}
+
+// 클라이언트 코드
+public class Main {
+    public static void main(String[] args) {
+        OldSystem oldSystem = new OldSystem();
+        NewSystem adapter = new Adapter(oldSystem);
+        adapter.newMethod(); // 어댑터를 통해 oldMethod()를 호출
+    }
+}
+```
+
+위 예시에서, `OldSystem`은 기존 시스템을 표현하고 `Adapter`는 이를 `NewSystem` 인터페이스에 맞게 변환해줍니다. 이렇게 하면 `OldSystem`의 코드를 변경하지 않고도 새로운 방식으로 사용할 수 있게 됩니다.

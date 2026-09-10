@@ -1,0 +1,135 @@
+# 인스턴스 통제 클래스
+
+**값 클래스여도 `equals` 재정의가 필요 없는 경우**
+
+값 클래스를 설계할 때, 일반적으로 객체의 **논리적 동치성**을 판단하기 위해 `equals` 메서드를 재정의합니다. 그러나 **값이 같은 인스턴스가 둘 이상 만들어지지 않는 인스턴스 통제 클래스**라면 `equals`를 재정의하지 않아도 됩니다. 이런 경우에는 객체의 \*\*식별성(Identity)\*\*과 \*\*논리적 동치성(Equality)\*\*이 동일하게 취급되기 때문입니다.
+
+#### **인스턴스 통제 클래스란?**
+
+* \*\*인스턴스 통제 클래스(Instance-Controlled Class)\*\*는 동일한 값을 갖는 객체가 단 하나만 존재하도록 설계된 클래스입니다.
+* 이러한 클래스는 **생성자를 `private`으로 제한**하고, 객체 생성을 통제하여 동일한 값에 대해 하나의 인스턴스만을 제공합니다.
+* 이로 인해 **객체의 식별성**(`==` 연산자 사용)과 **논리적 동치성**(`equals` 메서드 사용)이 동일해집니다.
+
+#### **대표적인 예: `Enum`**
+
+* **`Enum` 타입**은 자바에서 인스턴스 통제 클래스의 대표적인 예입니다.
+* 각 열거 상수는 **유일한 인스턴스**이며, 동일한 열거 상수에 대해 여러 인스턴스가 생성되지 않습니다.
+* 따라서 `Enum` 타입에서는 **`equals` 메서드를 재정의하지 않아도** 됩니다.
+* **객체의 식별성**과 **논리적 동치성**이 동일하므로, **`==` 연산자**로 비교해도 충분합니다.
+
+**예시 코드:**
+
+```java
+public enum Color {
+    RED, GREEN, BLUE;
+}
+
+// 사용 예시
+Color color1 = Color.RED;
+Color color2 = Color.RED;
+
+// 동일한 인스턴스이므로 참조 비교가 가능
+System.out.println(color1 == color2);     // true
+System.out.println(color1.equals(color2)); // true
+
+// 다른 인스턴스와 비교
+Color color3 = Color.GREEN;
+System.out.println(color1 == color3);     // false
+System.out.println(color1.equals(color3)); // false
+```
+
+* `Color.RED`는 유일한 인스턴스이므로 `color1`과 `color2`는 동일한 객체를 참조합니다.
+* 따라서 `==` 연산자와 `equals` 메서드 모두 `true`를 반환합니다.
+* `equals` 메서드를 재정의하지 않았지만, `Object` 클래스의 기본 구현으로도 논리적 동치성을 올바르게 판단할 수 있습니다.
+
+#### **인스턴스 통제 클래스의 구현 방법**
+
+* **생성자를 `private`으로 선언**하여 외부에서 객체 생성을 막습니다.
+* **정적 팩토리 메서드**를 제공하여 객체 생성을 통제합니다.
+* 동일한 값을 가지는 요청에 대해 **캐싱된 인스턴스를 반환**합니다.
+
+**예시 코드:**
+
+```java
+public class Currency {
+    private static final Map<String, Currency> instances = new HashMap<>();
+
+    private final String code;
+
+    // 생성자를 private으로 선언
+    private Currency(String code) {
+        this.code = code;
+    }
+
+    // 정적 팩토리 메서드로 객체 생성 통제
+    public static Currency getInstance(String code) {
+        synchronized (instances) {
+            // 이미 존재하면 캐싱된 인스턴스 반환
+            if (instances.containsKey(code)) {
+                return instances.get(code);
+            }
+            // 존재하지 않으면 새 인스턴스 생성 후 캐싱
+            Currency currency = new Currency(code);
+            instances.put(code, currency);
+            return currency;
+        }
+    }
+
+    public String getCode() {
+        return code;
+    }
+
+    // equals를 재정의하지 않음
+}
+
+// 사용 예시
+Currency usd1 = Currency.getInstance("USD");
+Currency usd2 = Currency.getInstance("USD");
+
+System.out.println(usd1 == usd2);     // true
+System.out.println(usd1.equals(usd2)); // true
+```
+
+* `Currency` 클래스는 특정 통화 코드를 가진 인스턴스가 하나만 생성되도록 합니다.
+* `usd1`과 `usd2`는 모두 `"USD"` 코드를 가지며, 동일한 인스턴스를 참조합니다.
+* 따라서 `==` 연산자와 `equals` 메서드 모두 `true`를 반환합니다.
+* `equals` 메서드를 재정의하지 않아도 객체의 동등성을 올바르게 판단할 수 있습니다.
+
+#### **객체 식별성과 논리적 동치성의 일치**
+
+* **객체 식별성(Identity)**: 객체의 메모리 주소를 비교하여 동일한 객체인지 판단합니다. `==` 연산자를 사용합니다.
+* **논리적 동치성(Equality)**: 객체의 속성이나 상태를 비교하여 논리적으로 동등한지를 판단합니다. `equals` 메서드를 사용합니다.
+* **인스턴스 통제 클래스**에서는 동일한 값을 가지는 객체가 하나만 존재하므로, **식별성과 동치성이 일치**합니다.
+
+#### **왜 `equals`를 재정의하지 않아도 되는가?**
+
+* `Object` 클래스의 기본 `equals` 메서드는 **참조 비교**를 수행합니다.
+* 인스턴스 통제 클래스는 동일한 값을 가지는 객체가 하나만 존재하므로, 참조 비교로도 논리적 동치성을 판단할 수 있습니다.
+* 따라서 `equals` 메서드를 재정의하지 않아도 됩니다.
+
+#### **정리**
+
+* **인스턴스 통제 클래스**는 동일한 값을 가지는 인스턴스가 둘 이상 존재하지 않도록 설계된 클래스입니다.
+* 이러한 클래스에서는 **객체의 식별성**과 **논리적 동치성**이 동일하므로, `equals` 메서드를 재정의할 필요가 없습니다.
+* 대표적인 예로 **`Enum` 타입**이 있으며, 사용자 정의 클래스에서도 생성자를 `private`으로 제한하고 정적 팩토리 메서드를 통해 인스턴스를 통제할 수 있습니다.
+* 이러한 설계를 통해 객체의 동등성 비교 시 **`==` 연산자**를 사용할 수 있으며, `equals` 메서드를 재정의하지 않아도 됩니다.
+
+#### **참고 사항**
+
+* **불변 객체(Immutable Object)**: 인스턴스 통제 클래스는 일반적으로 불변 객체로 설계됩니다. 이는 객체의 상태 변경을 방지하여 일관성을 유지하기 위함입니다.
+* **메모리 효율성**: 동일한 값을 가지는 객체를 하나만 유지하므로 메모리 사용을 최적화할 수 있습니다.
+* **캐싱과 성능**: 인스턴스를 캐싱하여 객체 생성 비용을 절감할 수 있습니다.
+
+#### **요약**
+
+* **값 클래스여도 `equals`를 재정의하지 않아도 되는 경우**가 있습니다.
+* **인스턴스 통제 클래스**에서는 동일한 값을 가지는 인스턴스가 하나만 존재하므로, **객체 식별성**과 **논리적 동치성**이 동일합니다.
+* 대표적인 예로 **`Enum` 타입**이 있으며, 이러한 클래스에서는 `equals` 메서드를 재정의하지 않아도 됩니다.
+* 이를 통해 코드의 복잡성을 줄이고, 객체 비교를 간소화할 수 있습니다.
+
+#### **참고 자료**
+
+* **Effective Java 3판** (조슈아 블로크 저): 아이템 1 "생성자 대신 정적 팩터리 메서드를 고려하라", 아이템 3 "private 생성자나 열거 타입으로 싱글턴임을 보증하라"에서 인스턴스 통제와 관련된 내용을 다룹니다.
+* **Java 공식 문서**:
+  * [Enum Types](https://docs.oracle.com/javase/tutorial/java/javaOO/enum.html)
+  * [Object 클래스 - equals 메서드](https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html#equals-java.lang.Object-)
