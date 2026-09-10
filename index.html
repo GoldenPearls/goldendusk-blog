@@ -159,6 +159,7 @@ img { max-width: 100%; display: block; }
   font-weight: 500;
   color: var(--text-2);
   white-space: nowrap;
+  cursor: pointer;
   transition: all 0.15s;
 }
 .nav-link:hover { color: var(--text); background: var(--accent-soft); }
@@ -920,9 +921,9 @@ img { max-width: 100%; display: block; }
   <div class="header-inner">
     <a href="#" class="logo" onclick="goHome()"><span class="logo-cat">&#128049;</span> Golden<em>Dusk</em>.log</a>
     <nav class="header-nav">
-      <a href="#" class="nav-link active" onclick="goHome()">홈</a>
-      <a href="#" class="nav-link" onclick="document.querySelector('.main-layout').scrollIntoView({behavior:'smooth'})">서재</a>
-      <a href="#" class="nav-link" onclick="document.getElementById('timelineSection').scrollIntoView({behavior:'smooth'})">나의 일대기</a>
+      <a class="nav-link active" onclick="event.preventDefault();goHome()">홈</a>
+      <a class="nav-link" onclick="event.preventDefault();document.querySelector('.main-layout').scrollIntoView({behavior:'smooth'})">서재</a>
+      <a class="nav-link" onclick="event.preventDefault();document.getElementById('timelineSection').scrollIntoView({behavior:'smooth'})">나의 일대기</a>
     </nav>
     <div class="header-spacer"></div>
     <div class="header-search">
