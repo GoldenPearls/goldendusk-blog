@@ -49,13 +49,16 @@ function parseRSSItems(xml) {
     };
     const link = get('link');
     const guidMatch = link.match(/\/(\d+)/);
+    const desc = get('description');
+    const thumbMatch = desc.match(/<img\s+src="([^"]+)"/);
     items.push({
       title: get('title'),
       link,
       postId: guidMatch ? guidMatch[1] : '',
       category: get('category'),
       pubDate: get('pubDate'),
-      description: get('description').replace(/<[^>]+>/g, '').slice(0, 200),
+      description: desc.replace(/<[^>]+>/g, '').slice(0, 200),
+      thumb: thumbMatch ? thumbMatch[1].replace(/\?type=\w+/, '?type=w400') : '',
     });
   }
   return items;
@@ -91,13 +94,8 @@ function htmlToMarkdown(html) {
     } else if (m[0].includes('se-image-resource')) {
       const srcMatch = m[0].match(/data-lazy-src="([^"]+)"|src="([^"]+)"/);
       if (srcMatch) {
-        const imgUrl = srcMatch[1] || srcMatch[2];
-        if (!imgUrl.includes('type=w80_blur')) {
-          lines.push(`\n![](${imgUrl})\n`);
-        } else {
-          const cleanUrl = imgUrl.replace('?type=w80_blur', '?type=w800');
-          lines.push(`\n![](${cleanUrl})\n`);
-        }
+        const imgUrl = (srcMatch[1] || srcMatch[2]).replace(/\?type=\w+/, '?type=s3').replace(/mblogthumb-phinf\.pstatic\.net/g, 'blogthumb.pstatic.net');
+        lines.push(`\n![](${imgUrl})\n`);
       }
     } else if (m[1]) {
       // Text paragraph
@@ -155,7 +153,7 @@ async function main() {
       icon: CAT_ICONS[cat] || '🌿',
       source: 'naver',
       slug: item.postId,
-      thumb: '',
+      thumb: item.thumb || '',
       url: `https://blog.naver.com/${BLOG_ID}/${item.postId}`,
       preview: item.description.slice(0, 200),
     });

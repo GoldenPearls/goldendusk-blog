@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>GoldenDusk.log</title>
 <meta name="description" content="황혼의 서재 — GoldenDusk의 개발, 회고, 일상 기록">
+<meta name="referrer" content="no-referrer">
 <style>
 @font-face {
   font-family: 'Cafe24Surround';
@@ -280,7 +281,12 @@ img { max-width: 100%; display: block; }
   max-height: calc(100vh - 80px);
   overflow-y: auto;
   scrollbar-width: thin;
+  scrollbar-color: var(--accent) transparent;
 }
+.sidebar::-webkit-scrollbar { width: 6px; }
+.sidebar::-webkit-scrollbar-track { background: transparent; }
+.sidebar::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 3px; }
+.sidebar::-webkit-scrollbar-thumb:hover { background: var(--accent-dark); }
 .sidebar-card {
   background: var(--card);
   border: 1px solid var(--border);
@@ -637,6 +643,13 @@ img { max-width: 100%; display: block; }
   background: var(--card);
   z-index: 510;
   overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--accent) transparent;
+}
+.detail-panel::-webkit-scrollbar { width: 6px; }
+.detail-panel::-webkit-scrollbar-track { background: transparent; }
+.detail-panel::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 3px; }
+.detail-panel::-webkit-scrollbar-thumb:hover { background: var(--accent-dark); }
   transform: translateX(100%);
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: -8px 0 40px rgba(0,0,0,0.15);
@@ -1041,6 +1054,13 @@ img { max-width: 100%; display: block; }
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/15.0.4/marked.min.js"></script>
 <script>
+marked.use({ renderer: {
+  image({href, title, text}) {
+    const rp = (href && (href.includes('pstatic.net') || href.includes('naver'))) ? ' referrerpolicy="no-referrer"' : '';
+    const t = title ? ` title="${title}"` : '';
+    return `<img src="${href}" alt="${text||''}"${t}${rp} loading="lazy">`;
+  }
+}});
 let POSTS = [];
 let state = { source: 'all', cat: null, search: '', visible: 24, sort: 'newest' };
 let showAllCats = false;
