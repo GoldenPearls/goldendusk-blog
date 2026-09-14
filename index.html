@@ -1107,7 +1107,7 @@ const CAT_GROUPS = {
 };
 
 async function init() {
-  const res = await fetch('posts-meta.json');
+  const res = await fetch('posts-meta.json?v=' + Date.now());
   POSTS = await res.json();
   document.getElementById('totalCount').textContent = POSTS.length;
   const cats = [...new Set(POSTS.map(p => p.cat).filter(Boolean))];
