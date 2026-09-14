@@ -76,42 +76,63 @@ async function fetchPostBody(postId) {
   return htmlToMarkdown(html);
 }
 
+function cleanText(h) {
+  return h
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<b>([\s\S]*?)<\/b>/gi, '**$1**')
+    .replace(/<i>([\s\S]*?)<\/i>/gi, '*$1*')
+    .replace(/<a[^>]+href="([^"]*)"[^>]*>([\s\S]*?)<\/a>/gi, '[$2]($1)')
+    .replace(/<span[^>]*>([\s\S]*?)<\/span>/gi, '$1')
+    .replace(/<[^>]+>/g, '')
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&')
+    .trim();
+}
+
+function fixImgUrl(url) {
+  return url.replace(/\?type=\w+/, '?type=s3').replace(/mblogthumb-phinf\.pstatic\.net/g, 'blogthumb.pstatic.net');
+}
+
+function parseTable(tableHtml) {
+  const rows = [];
+  for (const rm of tableHtml.matchAll(/<tr[^>]*>([\s\S]*?)<\/tr>/gi)) {
+    const cells = [];
+    for (const cm of rm[1].matchAll(/<td[^>]*>([\s\S]*?)<\/td>/gi)) {
+      cells.push(cleanText(cm[1]));
+    }
+    if (cells.length) rows.push(cells);
+  }
+  if (!rows.length) return '';
+  const cols = Math.max(...rows.map(r => r.length));
+  const widths = Array(cols).fill(3);
+  rows.forEach(r => r.forEach((c, i) => { widths[i] = Math.max(widths[i], c.length); }));
+  const pad = (s, w) => s + ' '.repeat(Math.max(0, w - s.length));
+  const mdRows = rows.map(r => '| ' + Array.from({length: cols}, (_, i) => pad(r[i] || '', widths[i])).join(' | ') + ' |');
+  const sep = '| ' + widths.map(w => '-'.repeat(w)).join(' | ') + ' |';
+  mdRows.splice(1, 0, sep);
+  return mdRows.join('\n');
+}
+
 function htmlToMarkdown(html) {
   const containerMatch = html.match(/<div class="se-main-container">([\s\S]*?)<\/div>\s*<!-- _BLOG_CONTENTS_FOOTER/);
   const content = containerMatch ? containerMatch[1] : html;
 
   const lines = [];
-
-  // Extract text paragraphs
-  const compRegex = /<div class="se-component se-(text|image|sticker|table|hr|map)[^"]*"[^>]*>([\s\S]*?)<\/div>\s*(?:<script|<\/div>\s*<div class="se-component|$)/g;
-
-  // Simpler approach: extract all text and images in order
-  const partRegex = /<p class="se-text-paragraph[^"]*"[^>]*>([\s\S]*?)<\/p>|<img[^>]+class="se-image-resource"[^>]*>|<div class="se-hr"><\/div>/g;
+  const partRegex = /<p class="se-text-paragraph[^"]*"[^>]*>([\s\S]*?)<\/p>|<img[^>]+class="se-image-resource"[^>]*>|<div class="se-(?:hr|horizontalLine)"><\/div>|<table[^>]*>([\s\S]*?)<\/table>/g;
   let m;
   while ((m = partRegex.exec(content)) !== null) {
-    if (m[0].includes('se-hr')) {
+    if (m[0].includes('se-hr') || m[0].includes('se-horizontalLine')) {
       lines.push('\n---\n');
+    } else if (m[0].startsWith('<table')) {
+      const md = parseTable(m[0]);
+      if (md) lines.push(md);
     } else if (m[0].includes('se-image-resource')) {
       const srcMatch = m[0].match(/data-lazy-src="([^"]+)"|src="([^"]+)"/);
-      if (srcMatch) {
-        const imgUrl = (srcMatch[1] || srcMatch[2]).replace(/\?type=\w+/, '?type=s3').replace(/mblogthumb-phinf\.pstatic\.net/g, 'blogthumb.pstatic.net');
-        lines.push(`\n![](${imgUrl})\n`);
-      }
+      if (srcMatch) lines.push(`\n![](${fixImgUrl(srcMatch[1] || srcMatch[2])})\n`);
     } else if (m[1]) {
-      // Text paragraph
-      let text = m[1]
-        .replace(/<br\s*\/?>/gi, '\n')
-        .replace(/<b>([\s\S]*?)<\/b>/gi, '**$1**')
-        .replace(/<i>([\s\S]*?)<\/i>/gi, '*$1*')
-        .replace(/<span[^>]*>([\s\S]*?)<\/span>/gi, '$1')
-        .replace(/<a[^>]+href="([^"]*)"[^>]*>([\s\S]*?)<\/a>/gi, '[$2]($1)')
-        .replace(/<[^>]+>/g, '')
-        .replace(/&nbsp;/g, ' ')
-        .replace(/&lt;/g, '<')
-        .replace(/&gt;/g, '>')
-        .replace(/&amp;/g, '&')
-        .trim();
-      if (text) lines.push(text);
+      const isHeading = /se-fs-fs(?:1[8-9]|[2-9]\d)/.test(m[0]);
+      let text = cleanText(m[1]);
+      if (text) lines.push(isHeading ? `### ${text.replace(/^\*\*|\*\*$/g, '')}` : text);
     }
   }
 
