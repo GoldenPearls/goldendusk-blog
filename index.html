@@ -1057,7 +1057,7 @@ marked.use({ renderer: {
   image({href, title, text}) {
     const rp = (href && (href.includes('pstatic.net') || href.includes('naver'))) ? ' referrerpolicy="no-referrer"' : '';
     const t = title ? ` title="${title}"` : '';
-    return `<img src="${href}" alt="${text||''}"${t}${rp} loading="lazy">`;
+    return `<img src="${href}" alt="${text||''}"${t}${rp}>`;
   }
 }});
 let POSTS = [];

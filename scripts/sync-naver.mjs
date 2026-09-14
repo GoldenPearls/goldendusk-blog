@@ -58,7 +58,7 @@ function parseRSSItems(xml) {
       category: get('category'),
       pubDate: get('pubDate'),
       description: desc.replace(/<[^>]+>/g, '').slice(0, 200),
-      thumb: thumbMatch ? thumbMatch[1].replace(/\?type=\w+/, '?type=w400') : '',
+      thumb: thumbMatch ? thumbMatch[1].replace(/\?type=\w+/, '?type=s3').replace(/mblogthumb-phinf\.pstatic\.net/g, 'blogthumb.pstatic.net') : '',
     });
   }
   return items;
