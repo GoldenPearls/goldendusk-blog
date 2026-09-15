@@ -2,7 +2,7 @@ import { readFileSync, writeFileSync } from 'fs';
 import { join } from 'path';
 
 const VELOG_USER = 'prettylee620';
-const API = 'https://velog.io/graphql';
+const API = 'https://v3.velog.io/graphql';
 const ROOT = join(import.meta.dirname, '..');
 const META_PATH = join(ROOT, 'posts-meta.json');
 const CONTENT_DIR = join(ROOT, 'content');

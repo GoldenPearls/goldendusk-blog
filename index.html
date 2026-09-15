@@ -905,10 +905,36 @@ img { max-width: 100%; display: block; }
   .main-layout { flex-direction: column; }
   .sidebar { position: static; max-height: none; flex: none; }
   .post-grid { grid-template-columns: 1fr; }
-  .tl-track { grid-template-columns: 1fr !important; gap: 16px; padding: 0; }
-  .tl-track::before { display: none; }
+  .tl-track {
+    display: flex !important; flex-direction: column; gap: 0;
+    padding: 0 0 0 40px; position: relative;
+  }
+  .tl-track::before {
+    display: block; top: 14px; bottom: 14px; left: 15px; right: auto;
+    width: 2px; height: auto;
+    background: linear-gradient(to bottom, var(--accent), var(--accent-dark));
+    border-radius: 1px;
+  }
   .tl-connector { display: none; }
-  .tl-card-wrap { max-width: 400px; margin: 0 auto; }
+  .tl-card-wrap {
+    max-width: none; margin: 0;
+    flex-direction: column; align-items: stretch;
+    position: relative; padding: 0 0 24px 0;
+  }
+  .tl-card-wrap::before {
+    content: ''; position: absolute; left: -30px; top: 8px;
+    width: 10px; height: 10px; border-radius: 50%;
+    background: var(--accent); border: 3px solid var(--bg);
+    box-shadow: 0 0 0 2px var(--accent);
+    z-index: 2;
+  }
+  .tl-year-badge {
+    position: absolute; left: -40px; top: 26px;
+    padding: 2px 0; font-size: 11px; border-radius: 0;
+    background: none !important; color: var(--accent-dark); font-weight: 700;
+    margin: 0; text-align: center; width: 32px;
+  }
+  .tl-card { margin: 0; }
 }
 @media (max-width: 640px) {
   .container { padding: 0 16px; }
