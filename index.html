@@ -593,6 +593,23 @@ img { max-width: 100%; display: block; }
   flex: 1;
 }
 .tl-card-date { font-size: 12px; color: var(--text-3); }
+.tl-story-badge { background: var(--accent-dark) !important; font-size: 10px !important; letter-spacing: 0.5px; }
+.tl-story-card { border-left: 3px solid var(--accent); }
+
+.share-btn {
+  padding: 6px 12px; border-radius: 16px;
+  background: var(--bg); color: var(--text-2);
+  font-size: 12px; white-space: nowrap; transition: background 0.15s;
+  cursor: pointer; border: 1px solid var(--border);
+}
+.share-btn:hover { background: var(--accent-soft); color: var(--accent-dark); }
+.share-toast {
+  position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+  background: var(--accent-dark); color: #fff; padding: 10px 24px;
+  border-radius: 20px; font-size: 13px; z-index: 9999;
+  opacity: 0; transition: opacity 0.3s; pointer-events: none;
+}
+.share-toast.show { opacity: 1; }
 
 /* ===== FOOTER ===== */
 .site-footer {
@@ -934,6 +951,7 @@ img { max-width: 100%; display: block; }
     background: none !important; color: var(--accent-dark); font-weight: 700;
     margin: 0; text-align: center; width: 32px;
   }
+  .tl-story-badge { width: auto !important; left: -48px !important; font-size: 9px !important; }
   .tl-card { margin: 0; }
 }
 @media (max-width: 640px) {
@@ -949,6 +967,7 @@ img { max-width: 100%; display: block; }
   .hero-stats { flex-wrap: wrap; gap: 12px; }
   .source-tabs { flex-wrap: wrap; }
   .footer-inner { flex-direction: column; gap: 12px; text-align: center; }
+  .share-btn { padding: 4px 8px; font-size: 11px; }
 }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
@@ -1041,6 +1060,7 @@ img { max-width: 100%; display: block; }
 </footer>
 
 <div class="reading-progress" id="readingProgress"><div class="reading-progress-bar" id="readingBar"></div></div>
+<div class="share-toast" id="shareToast"></div>
 <div class="overlay" id="overlay" onclick="closeDetail()"></div>
 <div class="detail-panel" id="detailPanel">
   <div class="detail-header">
@@ -1048,6 +1068,8 @@ img { max-width: 100%; display: block; }
     <span class="detail-header-title" id="detailHeaderTitle"></span>
     <button class="expand-btn" id="expandBtn" onclick="toggleExpand()" title="크게 보기"><svg viewBox="0 0 24 24"><path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/></svg></button>
     <a class="original-link" id="detailOrigLink" href="#" target="_blank" rel="noopener">원문 보기</a>
+    <button class="share-btn" onclick="copyPostLink()" title="링크 복사">📋 링크 복사</button>
+    <button class="share-btn" onclick="sharePost()" title="공유하기">🔗 공유</button>
   </div>
   <div class="detail-hero" id="detailHero"></div>
   <div class="detail-content-wrap">
@@ -1154,6 +1176,8 @@ async function init() {
     renderPosts();
   });
   window.addEventListener('keydown', e => { if (e.key === 'Escape') closeDetail(); });
+  const hashMatch = location.hash.match(/^#post-(\d+)$/);
+  if (hashMatch) openPost(+hashMatch[1]);
   initTheme();
 }
 
@@ -1285,17 +1309,31 @@ function renderTimeline() {
     byYear[y] = r;
   }
   const entries = Object.entries(byYear).sort((a,b) => a[0].localeCompare(b[0]));
-  const titles = ['기록의 시작', '변화와 성장', '함께 나아가기', '새로운 장'];
-  const descs = [
-    '하고 싶은 것을 하나씩 기록하기 시작했습니다.',
-    '새로운 기술을 배우고, 더 넓은 세상을 만나며 성장한 해입니다.',
-    '지금도, 앞으로도 좋은 기록을 만들어 나가겠습니다.',
-    '끝없이 이어지는 기록의 여정.'
-  ];
+  const myStoryPost = POSTS.find(p => p.id === 51);
+  const yearMeta = {
+    '2023': { title: '기록의 시작', desc: '하고 싶은 것을 하나씩 기록하기 시작했습니다.' },
+    '2024': { title: '변화와 성장', desc: '신입 개발자로 취업하고, 커피챗과 커뮤니티를 시작하며 Level Up한 해.' },
+    '2025': { title: '균형과 도약', desc: '만다라트 9개 카테고리 결산 — 걷기·스터디·연애·투자 100% 달성, 다이어트·독서·자격증 0%. 실패도 있었지만 진짜 원하는 방향이 보이기 시작한 해.' },
+  };
+  const defaultMeta = { title: '새로운 장', desc: '끝없이 이어지는 기록의 여정.' };
 
   const track = document.getElementById('tlTrack');
-  track.style.setProperty('--tl-cols', entries.length);
-  track.innerHTML = entries.map(([year, p], i) => {
+  const totalCols = entries.length + (myStoryPost ? 1 : 0);
+  track.style.setProperty('--tl-cols', totalCols);
+  let html = '';
+  if (myStoryPost) {
+    html += `<div class="tl-card-wrap tl-story-wrap">
+      <div class="tl-year-badge tl-story-badge">나의 전체</div>
+      <span class="tl-connector">🐾</span>
+      <div class="tl-card tl-story-card" onclick="openPost(${myStoryPost.id})">
+        <div class="tl-card-title">삶의 지도</div>
+        <div class="tl-card-desc">실패와 우울, 자존감 바닥을 딛고 여기까지 온 나의 이야기. 극복기이자 삶의 지도.</div>
+        <div class="tl-card-date">${myStoryPost.date || ''}</div>
+      </div>
+    </div>`;
+  }
+  html += entries.map(([year, p], i) => {
+    const meta = yearMeta[year] || defaultMeta;
     const connector = i < entries.length - 1
       ? `<span class="tl-connector">🐾</span>`
       : '';
@@ -1303,12 +1341,13 @@ function renderTimeline() {
       <div class="tl-year-badge">${year}</div>
       ${connector}
       <div class="tl-card" onclick="openPost(${p.id})">
-        <div class="tl-card-title">${titles[i] || titles[3]}</div>
-        <div class="tl-card-desc">${descs[i] || descs[3]}</div>
+        <div class="tl-card-title">${meta.title}</div>
+        <div class="tl-card-desc">${meta.desc}</div>
         <div class="tl-card-date">${p.date || ''}</div>
       </div>
     </div>`;
   }).join('');
+  track.innerHTML = html;
 }
 
 function setSource(s) {
@@ -1346,9 +1385,12 @@ function goHome() {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
+let currentPostId = null;
 async function openPost(id) {
   const p = POSTS.find(x => x.id === id);
   if (!p) return;
+  currentPostId = id;
+  history.replaceState(null, '', '#post-' + id);
 
   document.getElementById('overlay').classList.add('open');
   document.getElementById('detailPanel').classList.add('open');
@@ -1466,6 +1508,45 @@ function closeDetail() {
   hero.className = 'detail-hero';
   panel.removeEventListener('scroll', handleDetailScroll);
   updateExpandIcon();
+  currentPostId = null;
+  history.replaceState(null, '', location.pathname + location.search);
+}
+
+function showToast(msg) {
+  const t = document.getElementById('shareToast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+function getPostUrl(id) {
+  return location.origin + location.pathname + '#post-' + id;
+}
+
+function copyPostLink() {
+  if (!currentPostId) return;
+  const url = getPostUrl(currentPostId);
+  if (navigator.clipboard?.writeText) {
+    navigator.clipboard.writeText(url).then(() => showToast('링크가 복사되었습니다!')).catch(() => fallbackCopy(url));
+  } else { fallbackCopy(url); }
+}
+function fallbackCopy(text) {
+  const ta = document.createElement('textarea');
+  ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+  document.body.appendChild(ta); ta.select();
+  document.execCommand('copy');
+  document.body.removeChild(ta);
+  showToast('링크가 복사되었습니다!');
+}
+
+function sharePost() {
+  if (!currentPostId) return;
+  const p = POSTS.find(x => x.id === currentPostId);
+  if (navigator.share) {
+    navigator.share({ title: p?.title || 'GoldenDusk.log', url: getPostUrl(currentPostId) }).catch(() => {});
+  } else {
+    copyPostLink();
+  }
 }
 
 function toggleExpand() {
